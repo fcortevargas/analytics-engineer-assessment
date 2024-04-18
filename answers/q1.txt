@@ -1,0 +1,48 @@
+In order to model this database in an optimal way, it is first necessary to understand the data. By looking at these tables and performing some exploratory analysis, it is clear that:
+
+	- The `ad` table contains data of the ticket listings for sale of each event on TicketSwap's website. The table includes data such as the original ticket price, creation timestamp, whether the ticket was sold, etc.
+	- The `event` table contains data relating to the events themselves, such as title, start timestamp, etc.
+	- The `event_location` table contains data relating to the location of the events, such as the country, city, name of the venue, etc.
+
+This step is important because it will help us create a mental model of how to best model the raw data in a way that makes sense. For instance, writing a query to get the number of times a single event appears in the `ad` table revealed that there are multiple listings for each event. Another example is that the values of the `original_price` column in the `ad` table are considerably higher to what you would expect for ticket prices. This could indicate that the values of this column might need to be transformed in order to get what we need (for instance, if we divide the values in that column by 100, we get prices that align better with the expected price range of event tickets). Taking time to explore the data to get insights is necessary to understand it, and can help kickstart the thinking process on how to best model it.
+
+After creating a basic mental model of the data in these tables, it is then important to understand what the company needs from the data. Since the data will likely be used by several stakeholders, it is important to gather a set of requirements to understand their needs. Business intelligence tools like Looker and Amplitude might influence the modelling approach based on how they interface with different data structures for reporting or visualisation.
+
+Since we want to use the data for analytics purposes, it is important to model the data in a way that enables efficient and standardised data retrieval. It is important that the modelling allows for modularity to facilitate accessibility and maintainability, and scalability to enable the addition of new data or models when needed. Principles from software development such as writing DRY code, peer-reviewing models, version-control, automated testing and continuous documentation should all be parts of this process as well. 
+
+After there is a clear definition of requirements from the stakeholders, we can start by using data modelling tools such as an ER diagram to identify key entities and their attributes, as well as the relationships between entities. With this information, the desired output of the data modelling can be engineered. This might be data marts consisting of fact and dimension tables. 
+
+For the given data, the fact table could be a wide table that represents the listings posted on TicketSwap's website. This is because the business process relates to the sales of the listings. Additionally, we can store the information relating to the sales in different dimensions (such as location, event, currency, etc.). Since the fact table should include measurable business data and foreign keys to the related dimension tables, our data mart could look like this:
+
+Fact Table: `fct_listings`
+	- `listing_key` (str): Surrogate key hashed from all the foreign keys in the table to  create a unique identifier.
+	- `listing_id` (int): This table is designed with a granularity that each row represents an individual listing.
+	- `event_id` (str): Foreign key linking to the `dim_event` table.
+	- `location_id` (str): Foreign key linking to the `dim_location` table.
+	- `currency_id` (int): Foreign key linking to the `dim_currency` table.
+	- `original_listing_price` (float): Original price of the ticket.
+	- (Optional) `maximum_listing_price` (float): Since the maximum amount a ticket listing can have is capped and known (20% extra of the original price), we can add this to the fact table.
+	- `is_sold` (bool): Indicator of whether the listing was sold or not.
+	- `created_at` (timestamp): When the listing was created.
+
+Dimension Table: `dim_event`
+	- `event_id` (str): Primary key.
+	- `title` (str): Name or title of the event.
+	- `event_start_at` (timestamp): Start time and date of the event.
+
+Dimension Table: `dim_location`
+	- `location_id` (int): Primary key.
+	- `country` (str): Country of the venue.
+	- `venue_name` (str): Name of the venue.
+	- `city` (str): City of the venue.
+
+Dimension Table: `dim_currency`
+	- `currency_id` (int): Primary key.
+	- `original_price_currency` (str): Currency of the original price.
+	- (Optional) `exchange_rate` (float): This could be a possible addition to the currency dimension. Since stakeholders might be interested in knowing the price in euros, it would be useful to keep track of the latest exchange rate. This field could be updated daily through an automated ETL job pulling from a reliable financial data source.
+
+The structure of the mart must strike a balance between data normalisation and denormalisation to keep data redundancy low while maximising performance (at the cost of some data redundancy). In this particular case, we can denormalise the location from the event dimension tables and instead join it to the fact table. This approach reduces the amount of joins that need to be performed by the consumers of the data. 
+
+Having reached this point, we can start working on the implementation of the data models. Using dbt, we can set up staging models to clean up and standardise the raw data. This can include dropping redundant columns (such as the index column in all three tables), renaming columns for readability, field type casting to get the columns into the proper type for downstream models, etc. After the staging layer come the intermediate model layers, which can be used to split the logic into one or more layers to help readability and modularity down the line. Finally, the mart layer is where everything comes together and where we include our models to get the dimension and fact tables.
+
+To ensure that the quality of the data is protected, dbt tests can be set up to check for data integrity issues such as duplicate listing, inconsistent dates, or orphan records in the fact table without corresponding dimension entries. CI/CD setups can automatically run these tests upon new data loads, ensuring the integrity of the data. To keep a good overview of the data lineage in the data modelling pipeline, it could be useful to draw a DAG to illustrate and understand the dependencies and flow between data models.

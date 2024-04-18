@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: dim_event
+    columns:
+      - name: event_key
+        description: The surrogate key of the event.
+        tests:
+          - not_null
+          - unique
+      - name: event_id
+        description: The natural key of the event.
+        tests:
+          - not_null
+          - unique

@@ -1,0 +1,26 @@
+version: 2
+
+models:
+  - name: fct_listings
+    columns:
+      - name: listing_key
+        description: The surrogate key of the listing.
+        tests:
+          - not_null
+          - unique
+      - name: listing_id
+        description: The natural key of the listing.
+        tests:
+          - not_null
+      - name: event_id
+        description: The foreign key to the event of the listing.
+        tests:
+          - not_null
+      - name: location_id
+        description: The foreign key to the location of the listing.
+        tests:
+          - not_null
+      - name: currency_id
+        description: The foreign key to the currency of the listing.
+        tests:
+          - not_null

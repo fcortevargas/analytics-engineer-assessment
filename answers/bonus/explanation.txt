@@ -1,0 +1,11 @@
+Hi!
+
+You might be wondering why there is a bonus folder included in my assessment answers. During my first interview, I wanted to showcase my ability to learn quickly and independently. To demonstrate this, I challenged myself to create dbt models for building the data mart I described in the first question of this assignment.
+
+In the bonus folder, you'll find the dbt project I developed. I would like to highlight the contents of the models folder, which includes the dbt models and tests that structure the data mart using the data you provided.
+
+I hope that this can serve as proof of my eagerness to learn and adapt to new tools, such as dbt, which I was unfamiliar with before this project. I also hope that this shows my commitment and motivation to learn and integrate into TicketSwap's workflow and my ability to independently learn new skills.
+
+Please feel free to ignore this part altogether, as it was not a requirement of the assignment. Regardless, this project was a valuable and enjoyable learning experience for me.
+
+Thank you for considering my work, and I look forward to your feedback!

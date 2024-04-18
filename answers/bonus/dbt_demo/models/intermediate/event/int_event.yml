@@ -1,0 +1,14 @@
+version: 2
+
+models:
+  - name: int_event
+    columns:
+      - name: location_id
+        description: The natural key of the location.
+        tests:
+          - not_null
+      - name: event_id
+        description: The natural key of the event.
+        tests:
+          - not_null
+          - unique

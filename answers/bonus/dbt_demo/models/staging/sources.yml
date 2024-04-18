@@ -1,0 +1,25 @@
+version: 2
+
+sources:
+  - name: data
+    database: dbt_db
+    schema: dbt_schema
+    tables:
+      - name: event_location
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+      - name: event
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null
+      - name: ad
+        columns:
+          - name: id
+            tests:
+              - unique
+              - not_null

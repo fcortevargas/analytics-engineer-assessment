@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: dim_location
+    columns:
+      - name: location_key
+        description: The surrogate key of the location.
+        tests:
+          - not_null
+          - unique
+      - name: location_id
+        description: The natural key of the location.
+        tests:
+          - not_null
+          - unique
